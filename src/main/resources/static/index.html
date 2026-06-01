@@ -1,36 +1,206 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Forecast</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 35%),
+                linear-gradient(180deg, #020617 0%, var(--bg) 100%);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 24px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 720px;
+            display: grid;
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(17, 24, 39, 0.92);
+            border: 1px solid var(--panel-border);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            margin: 0 0 8px;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            margin: 0 0 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 12px 14px;
+            font-size: 1rem;
+        }
+
+        input,
+        select {
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #64748b;
+        }
+
+        .actions {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            max-width: 220px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: #00111a;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .response-panel {
+            min-height: 220px;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .response-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .response-header span {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        pre {
+            margin: 0;
+            padding: 16px;
+            background: #020617;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            color: #dbeafe;
+            overflow: auto;
+            min-height: 160px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
 </head>
 <body>
+<main class="app">
+    <section class="card">
+        <h2>Weather Forecast</h2>
+        <p class="subtitle">Enter coordinates, choose a unit, and fetch the forecast.</p>
 
-<h2>Weather Forecast</h2>
+        <div class="form-grid">
+            <input id="lat" placeholder="Latitude">
+            <input id="lon" placeholder="Longitude">
 
-<input id="lat" placeholder="Latitude">
-<input id="lon" placeholder="Longitude">
+            <select id="unit">
+                <option value="metric">Celsius</option>
+                <option value="imperial">Fahrenheit</option>
+                <option value="standard">Kelvin</option>
+            </select>
+        </div>
 
-<select id="unit">
-    <option value="metric">Celsius</option>
-    <option value="imperial">Fahrenheit</option>
-</select>
+        <div class="actions">
+            <button onclick="fetchData()">Get Forecast</button>
+        </div>
+    </section>
 
-<button onclick="fetchData()">Get Forecast</button>
-
-<pre id="result"></pre>
+    <section class="card response-panel">
+        <div class="response-header">
+            <h3>Response</h3>
+            <span>API output</span>
+        </div>
+        <pre id="result">No response yet.</pre>
+    </section>
+</main>
 
 <script>
     async function fetchData() {
         const lat = document.getElementById("lat").value;
         const lon = document.getElementById("lon").value;
         const unit = document.getElementById("unit").value;
+        const result = document.getElementById("result");
 
-        const res = await fetch(`/api/weather/forecast?lat=${lat}&lon=${lon}&unit=${unit}`);
-        const data = await res.json();
+        result.innerText = "Loading...";
 
-        document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+        try {
+            const res = await fetch(`/api/weather/forecast?lat=${lat}&lon=${lon}&unit=${unit}`);
+            const data = await res.json();
+            result.innerText = JSON.stringify(data, null, 2);
+        } catch (error) {
+            result.innerText = `Error: ${error.message}`;
+        }
     }
 </script>
-
 </body>
 </html>
