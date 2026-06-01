@@ -1,38 +1,39 @@
 # Weather Forecast Service
 
-Spring Boot service that exposes a free weather forecast endpoint backed by the OpenWeather 5 day / 3 hour API.
+Spring Boot service that exposes a weather forecast endpoint backed by the free OpenWeather 5 day / 3 hour API.
 
 ## Current Implementation
 
-The service accepts latitude, longitude, and a unit system, fetches forecast data from OpenWeather, and returns a simplified response containing only the fields used by the application.
+The service accepts latitude, longitude, and a temperature unit, fetches forecast data from OpenWeather, and returns a simplified array of forecast objects. The current implementation uses the free forecast endpoint, not One Call, because One Call requires a subscription.
 
-### Main Flow
+### Flow
 
 1. `WeatherController` exposes `GET /api/weather/forecast`.
-2. `WeatherService` calls `WeatherClient` to fetch upstream weather data.
-3. The service maps the upstream response into a `ForecastResponse`.
-4. The response contains up to 5 forecast days pulled from the midday `12:00:00` entries in the free feed.
+2. The controller validates latitude and longitude ranges before invoking the service.
+3. `TemperatureUnitConverter` converts the `unit` query parameter into the `TemperatureUnit` enum.
+4. `WeatherService` calls `WeatherClient` to fetch upstream weather data.
+5. The service filters midday entries and maps them into `ForecastDay` objects.
+6. `ForecastResponse` returns the final `forecast` list.
 
-### Forecast Response
+### API Endpoint
 
-`ForecastResponse` is the top-level DTO returned by the API.
+`GET /api/weather/forecast`
 
-```java
-public class ForecastResponse {
-    private List<ForecastDay> forecast;
-}
+Query parameters:
+
+- `lat` - required latitude, must be between `-90.0` and `90.0`
+- `lon` - required longitude, must be between `-180.0` and `180.0`
+- `unit` - required temperature unit, must be one of `metric`, `imperial`, or `standard`
+
+Example:
+
+```bash
+GET /api/weather/forecast?lat=12.9716&lon=77.5946&unit=metric
 ```
 
-Each `ForecastDay` contains:
+### Response Shape
 
-```java
-private String dayOfWeek;
-private String date;
-private String highTemp;
-private String lowTemp;
-```
-
-### Example Response
+The response contains a single top-level property:
 
 ```json
 {
@@ -40,28 +41,27 @@ private String lowTemp;
     {
       "dayOfWeek": "MONDAY",
       "date": "06/03/2024",
-      "highTemp": "34.2 C",
-      "lowTemp": "26.1 C"
+      "highTemp": "30.0 C",
+      "lowTemp": "30.0 C"
     }
   ]
 }
 ```
 
-## API Endpoint
+Each forecast object contains:
 
-### `GET /api/weather/forecast`
+- `dayOfWeek`
+- `date` in `MM/dd/yyyy` format
+- `highTemp`
+- `lowTemp`
 
-Query parameters:
+### Current Behavior
 
-- `lat` - required latitude
-- `lon` - required longitude
-- `unit` - required unit system, must be one of `metric`, `imperial`, or `standard`
-
-Example:
-
-```bash
-GET /api/weather/forecast?lat=12.9716&lon=77.5946&unit=metric
-```
+- The service uses the free OpenWeather `/data/2.5/forecast` endpoint.
+- It filters forecast entries that match `12:00:00`.
+- It maps up to 7 midday entries, but the free feed typically provides up to 5 forecast days.
+- Temperatures are returned with a unit suffix such as `C`, `F`, or `K`.
+- The method name is still `get7DayForecast`, but the active implementation is based on the free forecast feed.
 
 ## Configuration
 
@@ -105,6 +105,15 @@ With query parameters:
 - `units`
 - `appid={weather.api.key}`
 
+## Error Handling
+
+The application uses structured error handling:
+
+- Validation issues return `400 Bad Request`
+- Upstream API issues return `502 Bad Gateway` or `503 Service Unavailable`
+- Weather payload issues return `502 Bad Gateway`
+- Unexpected failures return `500 Internal Server Error`
+
 ## Tech Stack
 
 - Java 25
@@ -116,8 +125,5 @@ With query parameters:
 
 ## Notes
 
-- The service currently returns only the `forecast` list from the upstream response.
-- Temperature values are formatted as strings with a unit suffix such as `C`, `F`, or `K`.
-- The current implementation filters 12:00:00 entries and returns up to 5 days from the free forecast feed.
-- The service method is still named `get7DayForecast`, but the active implementation returns up to 5 days from the free API.
-- Errors are handled by a global exception handler that returns `Error: <message>` with HTTP 500.
+- The UI is available in `src/main/resources/static/index.html`.
+- Unit tests are included for the weather service mapping.
