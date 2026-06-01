@@ -10,4 +10,5 @@ import java.util.List;
 public class ForecastResponse {
 
     private List<ForecastDay> forecast;
+
 }
