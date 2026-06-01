@@ -16,11 +16,10 @@ public class WeatherClient {
     public OpenWeatherResponse fetchWeather(Double lat, Double lon, String unit) {
         return webClient.get()
                 .uri(uri -> uri
-                        .path("/data/3.0/onecall")
+                        .path("/data/2.5/forecast")
                         .queryParam("lat", lat)
                         .queryParam("lon", lon)
-                        .queryParam("units", unit)
-                        .queryParam("exclude", "hourly,minutely,alerts")
+                        .queryParam("units", unit != null ? unit : "metric")
                         .queryParam("appid", weatherProperties.getKey())
                         .build())
                 .retrieve()

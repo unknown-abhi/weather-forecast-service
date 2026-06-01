@@ -7,17 +7,16 @@ import java.util.List;
 @Data
 public class OpenWeatherResponse {
 
-    private List<Daily> daily;
+    private List<ForecastItem> list;
 
     @Data
-    public static class Daily {
-        private long dt;
-        private Temp temp;
+    public static class ForecastItem {
+        private Main main;
+        private String dt_txt;
     }
 
     @Data
-    public static class Temp {
-        private double min;
-        private double max;
+    public static class Main {
+        private double temp;
     }
 }

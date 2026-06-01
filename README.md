@@ -1,6 +1,6 @@
 # Weather Forecast Service
 
-Spring Boot service that exposes a 7-day weather forecast endpoint backed by the OpenWeather One Call API.
+Spring Boot service that exposes a free weather forecast endpoint backed by the OpenWeather 5 day / 3 hour API.
 
 ## Current Implementation
 
@@ -11,7 +11,7 @@ The service accepts latitude, longitude, and a unit system, fetches forecast dat
 1. `WeatherController` exposes `GET /api/weather/forecast`.
 2. `WeatherService` calls `WeatherClient` to fetch upstream weather data.
 3. The service maps the upstream response into a `ForecastResponse`.
-4. The response contains up to 7 forecast days.
+4. The response contains up to 5 forecast days pulled from the midday `12:00:00` entries in the free feed.
 
 ### Forecast Response
 
@@ -39,7 +39,7 @@ private String lowTemp;
   "forecast": [
     {
       "dayOfWeek": "MONDAY",
-      "date": "06/01/2026",
+      "date": "06/03/2024",
       "highTemp": "34.2 C",
       "lowTemp": "26.1 C"
     }
@@ -69,22 +69,40 @@ The service reads these properties from `src/main/resources/application.properti
 
 ```properties
 spring.application.name=weather-forecast-service
+server.port=8080
 weather.api.key=YOUR_API_KEY
 weather.api.base-url=https://api.openweathermap.org
 ```
+
+## Local Setup
+
+Before running locally, make sure you have:
+
+- Java 25 installed
+- A valid OpenWeather API key in `src/main/resources/application.properties`
+- Network access to `https://api.openweathermap.org`
+
+## Run Locally
+
+You can run the service in 3 ways:
+
+1. `./mvnw spring-boot:run`
+2. Run `WeatherForecastServiceApplication` directly from your IDE
+3. Build the JAR with `./mvnw clean package` and run `java -jar target/weather-forecast-service-0.0.1-SNAPSHOT.jar`
+
+The service starts on port `8080` unless you change `server.port`.
 
 ## External API Call
 
 The client currently calls:
 
-`GET {weather.api.base-url}/data/3.0/onecall`
+`GET {weather.api.base-url}/data/2.5/forecast`
 
 With query parameters:
 
 - `lat`
 - `lon`
 - `units`
-- `exclude=hourly,minutely,alerts`
 - `appid={weather.api.key}`
 
 ## Tech Stack
@@ -100,4 +118,6 @@ With query parameters:
 
 - The service currently returns only the `forecast` list from the upstream response.
 - Temperature values are formatted as strings with a unit suffix such as `C`, `F`, or `K`.
+- The current implementation filters 12:00:00 entries and returns up to 5 days from the free forecast feed.
+- The service method is still named `get7DayForecast`, but the active implementation returns up to 5 days from the free API.
 - Errors are handled by a global exception handler that returns `Error: <message>` with HTTP 500.
