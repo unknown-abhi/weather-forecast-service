@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Forecast</title>
+</head>
+<body>
+
+<h2>Weather Forecast</h2>
+
+<input id="lat" placeholder="Latitude">
+<input id="lon" placeholder="Longitude">
+
+<select id="unit">
+    <option value="metric">Celsius</option>
+    <option value="imperial">Fahrenheit</option>
+</select>
+
+<button onclick="fetchData()">Get Forecast</button>
+
+<pre id="result"></pre>
+
+<script>
+    async function fetchData() {
+        const lat = document.getElementById("lat").value;
+        const lon = document.getElementById("lon").value;
+        const unit = document.getElementById("unit").value;
+
+        const res = await fetch(`/api/weather/forecast?lat=${lat}&lon=${lon}&unit=${unit}`);
+        const data = await res.json();
+
+        document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+    }
+</script>
+
+</body>
+</html>
