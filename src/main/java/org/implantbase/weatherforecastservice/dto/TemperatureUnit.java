@@ -1,5 +1,8 @@
 package org.implantbase.weatherforecastservice.dto;
 
+import lombok.Getter;
+
+@Getter
 public enum TemperatureUnit {
     METRIC("metric", " C"),
     IMPERIAL("imperial", " F"),
@@ -11,14 +14,6 @@ public enum TemperatureUnit {
     TemperatureUnit(String apiValue, String symbol) {
         this.apiValue = apiValue;
         this.symbol = symbol;
-    }
-
-    public String getApiValue() {
-        return apiValue;
-    }
-
-    public String getSymbol() {
-        return symbol;
     }
 
     public static TemperatureUnit fromValue(String value) {
