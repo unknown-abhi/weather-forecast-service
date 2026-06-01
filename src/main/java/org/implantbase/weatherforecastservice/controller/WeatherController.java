@@ -1,8 +1,10 @@
 package org.implantbase.weatherforecastservice.controller;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.RequiredArgsConstructor;
+import org.implantbase.weatherforecastservice.dto.TemperatureUnit;
 import org.implantbase.weatherforecastservice.dto.ForecastResponse;
 import org.implantbase.weatherforecastservice.service.WeatherService;
 import org.springframework.validation.annotation.Validated;
@@ -21,9 +23,11 @@ public class WeatherController {
 
     @GetMapping("/forecast")
     public ForecastResponse getForecast(
-            @RequestParam @NotNull Double lat,
-            @RequestParam @NotNull Double lon,
-            @RequestParam @Pattern(regexp = "metric|imperial|standard") String unit) {
+            // Restrict latitude and longitude to valid geographic ranges at the boundary.
+            @RequestParam @NotNull @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0") Double lat,
+            @RequestParam @NotNull @DecimalMin(value = "-180.0") @DecimalMax(value = "180.0") Double lon,
+            // TemperatureUnit is converted from the request value by the custom converter.
+            @RequestParam TemperatureUnit unit) {
         return weatherService.get7DayForecast(lat, lon, unit);
     }
 
