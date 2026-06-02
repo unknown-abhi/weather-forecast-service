@@ -1,14 +1,19 @@
 package org.implantbase.weatherforecastservice.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.List;
 
-@Data
-@AllArgsConstructor
+@Getter
 public class ForecastResponse {
 
-    private List<ForecastDay> forecast;
+    private final List<ForecastDay> forecast;
 
+    private ForecastResponse(List<ForecastDay> forecast) {
+        this.forecast = forecast;
+    }
+
+    public static ForecastResponse of(List<ForecastDay> forecast) {
+        return new ForecastResponse(forecast);
+    }
 }

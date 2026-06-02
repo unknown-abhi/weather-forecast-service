@@ -56,6 +56,6 @@ public class WeatherService {
             throw new WeatherApiException("No forecast entries matched the expected time window");
         }
 
-        return new ForecastResponse(list);
+        return ForecastResponse.of(list);
     }
 }
