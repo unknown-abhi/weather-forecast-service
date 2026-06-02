@@ -15,14 +15,14 @@ public class WeatherClient {
     private final WeatherProperties weatherProperties;
 
     public OpenWeatherResponse fetchWeather(Double lat, Double lon, TemperatureUnit unit) {
-        // The free tier uses the 5 day / 3 hour forecast endpoint.
+        String units = unit == null ? TemperatureUnit.METRIC.getApiValue() : unit.getApiValue();
+
         return webClient.get()
                 .uri(uri -> uri
                         .path("/data/2.5/forecast")
                         .queryParam("lat", lat)
                         .queryParam("lon", lon)
-                        // Default to metric if the caller omits the unit, though the controller normally supplies it.
-                        .queryParam("units", unit != null ? unit.getApiValue() : TemperatureUnit.METRIC.getApiValue())
+                        .queryParam("units", units)
                         .queryParam("appid", weatherProperties.getKey())
                         .build())
                 .retrieve()
